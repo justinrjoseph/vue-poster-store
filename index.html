@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="utf-8">
-    <meta name="referrer" content="never" />
+    <meta name="referrer" content="never">
     <title>Vue.js Poster Shop</title>
     <link rel="icon" href="public/favicon.ico" type="image/x-icon">
 
@@ -13,28 +13,68 @@
 
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="public/style.css">
-</head>
-<body>
-<div id="app">
-    <div class="header">
+  </head>
+
+  <body>
+    <div id="app" v-cloak>
+      <div class="header">
         <h1>Vue.js Poster Store</h1>
-    </div>
-    <div class="main">
+        <form class="searchbar" @submit.prevent="onSearch()">
+          <input type="text" placeholder="Search posters" v-model="search.current" autofocus>
+          <input type="submit" class="btn" value="Search">
+        </form>
+      </div>
+
+      <div class="main">
         <div class="products">
-            <p>Products go here.</p>
-        </div>
-        <div class="cart">
-            <h2>Shopping Cart</h2>
-            <div>
-                No items in the cart.
+          <div v-if="search.loading">Loading...</div>
+          <div class="search-results" v-if="results.length && !search.loading">
+            Found {{ results.length }} results for search term '{{ search.previous }}.'
+          </div>
+
+          <div class="product" v-for="(item, index) in items">
+            <div class="product-image">
+              <img :alt="item.title" :src="item.link">
             </div>
+            <div>
+              <h4 class="product-title">{{ item.title }}</h4>
+              <p>Price: <strong>{{ price | currency }}</strong></p>
+              <button class="btn add-to-cart" @click="addItem(index)">Add to Cart</button>
+            </div>
+          </div>
+
+          <div id="product-list-bottom">
+            <p v-if="allResultsDisplayed">
+              No more items
+            </p>
+          </div>
         </div>
+
+        <div class="cart">
+          <h2>Shopping Cart</h2>
+          <transition-group name="fade" tag="ul">
+            <li class="cart-item" v-for="item in cart" :key="item.id">
+              <div class="item-title">{{ item.title }}</div>
+              <span class="item-qty">{{ item.price | currency }} x {{ item.quantity }}</span>
+              <button class="btn" @click="incrementQty(item)">+</button>
+              <button class="btn" @click="decrementQty(item)">-</button>
+            </li>
+          </transition-group>
+          <transition name="fade">
+            <div v-if="cart.length">
+                <div>Total: {{ total | currency }}</div>
+            </div>
+          </transition>
+          <div class="empty-cart" v-if="cart.length === 0">No items in the Cart.</div>
+        </div>
+      </div>
     </div>
-</div>
 
-<!-- Scripts -->
-<script src="/reload/reload.js"></script>
-<script type="text/javascript" src="public/script.js"></script>
-
+    <!-- Scripts -->
+    <script src="/reload/reload.js"></script>
+    <script src="node_modules/vue/dist/vue.js"></script>
+    <script src="node_modules/vue-resource/dist/vue-resource.js"></script>
+    <script src="node_modules/scrollmonitor/scrollMonitor.js"></script>
+    <script type="text/javascript" src="public/script.js"></script>
 </body>
 </html>
